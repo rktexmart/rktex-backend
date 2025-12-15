@@ -8,29 +8,30 @@ public class ProductReview {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "rating_id")
-    private Long ratingId;
+    @Column(name = "review_id")
+    private Long reviewId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @Column(name = "rating", nullable = false)
-    private Integer rating;
+    private int rating;
 
-    @Column(name = "review", nullable = false, columnDefinition = "TEXT")
-    private String review;
+    @Column(name = "review_text")
+    private String reviewText;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "username", nullable = false)
+    private String username;
 
+    // Getters and setters
 
-    public Long getRatingId() {
-        return ratingId;
+    public Long getReviewId() {
+        return reviewId;
     }
 
-    public void setRatingId(Long ratingId) {
-        this.ratingId = ratingId;
+    public void setReviewId(Long reviewId) {
+        this.reviewId = reviewId;
     }
 
     public Product getProduct() {
@@ -41,27 +42,22 @@ public class ProductReview {
         this.product = product;
     }
 
-    public Integer getRating() {
+    public int getRating() {
         return rating;
     }
 
-    public void setRating(Integer rating) {
+    public void setRating(int rating) {
         this.rating = rating;
     }
 
-    public String getReview() {
-        return review;
+    public String getReviewText() {
+        return reviewText;
     }
 
-    public void setReview(String review) {
-        this.review = review;
+    public void setReviewText(String reviewText) {
+        this.reviewText = reviewText;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 }

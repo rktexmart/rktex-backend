@@ -1,18 +1,19 @@
 package com.opsmonsters.quick_bite.services;
 
+import com.opsmonsters.quick_bite.dto.AddressDto;
+import com.opsmonsters.quick_bite.dto.OrderDto;
 import com.opsmonsters.quick_bite.dto.ResponseDto;
 import com.opsmonsters.quick_bite.dto.UserDto;
-
 import com.opsmonsters.quick_bite.models.Users;
+import com.opsmonsters.quick_bite.models.Order;
 import com.opsmonsters.quick_bite.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -20,131 +21,61 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public ResponseDto createUser(UserDto dto) {
         try {
-
-            Optional<Users> existingUser = userRepo.findByEmail(dto.getEmail());
-            if (existingUser.isPresent()) {
+            if (userRepo.findByEmail(dto.getEmail()).isPresent()) {
                 return new ResponseDto(400, "User with email " + dto.getEmail() + " already exists!");
             }
-
 
             Users user = new Users();
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setEmail(dto.getEmail());
-            user.setPassword(dto.getPassword());
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
             user.setPhoneNumber(dto.getPhoneNumber());
             user.setProfileImageUrl(dto.getProfileImageUrl());
-
-            if (dto.getRole() == null || dto.getRole().isEmpty()) {
-                user.setRole("USER");
-            } else {
-                user.setRole(dto.getRole());
-            }
+            user.setRole(dto.getRole() == null || dto.getRole().isEmpty() ? "USER" : dto.getRole());
 
             Users savedUser = userRepo.save(user);
-
-            UserDto userDto = Stream.of(savedUser)
-                    .map(u -> {
-                        UserDto dtoResponse = new UserDto();
-                        dtoResponse.setUserId(u.getUserId());
-                        dtoResponse.setFirstName(u.getFirstName());
-                        dtoResponse.setLastName(u.getLastName());
-                        dtoResponse.setEmail(u.getEmail());
-                        dtoResponse.setPhoneNumber(u.getPhoneNumber());
-                        dtoResponse.setProfileImageUrl(u.getProfileImageUrl());
-                        dtoResponse.setRole(u.getRole());
-                        dtoResponse.setCreatedAt(u.getCreatedAt());
-                        dtoResponse.setUpdatedAt(u.getUpdatedAt());
-                        return dtoResponse;
-                    })
-                    .findFirst()
-                    .orElse(null);
-
-
-            return new ResponseDto(201, "User created successfully!", userDto);
+            return new ResponseDto(201, "User created successfully!", mapToDto(savedUser));
         } catch (Exception e) {
             return new ResponseDto(500, "Error while creating user: " + e.getMessage(), null);
         }
     }
 
     public List<UserDto> getAllUsers() {
-        return userRepo.findAll()
-                .stream()
-                .map(user -> {
-                    UserDto dto = new UserDto();
-                    dto.setUserId(user.getUserId());
-                    dto.setFirstName(user.getFirstName());
-                    dto.setLastName(user.getLastName());
-                    dto.setEmail(user.getEmail());
-                    dto.setPassword(user.getPassword());
-                    dto.setPhoneNumber(user.getPhoneNumber());
-                    dto.setProfileImageUrl(user.getProfileImageUrl());
-                    dto.setRole(user.getRole());
-                    dto.setCreatedAt(user.getCreatedAt());
-                    dto.setUpdatedAt(user.getUpdatedAt());
-                    return dto;
-                }).collect(Collectors.toList());
+        return userRepo.findAll().stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     public ResponseDto getUserById(Long userId) {
-        Optional<Users> userOptional = userRepo.findById(userId);
-        if (userOptional.isPresent()) {
-            Users user = userOptional.get();
-
-
-            UserDto userDto = new UserDto();
-            userDto.setUserId(user.getUserId());
-            userDto.setFirstName(user.getFirstName());
-            userDto.setLastName(user.getLastName());
-            userDto.setEmail(user.getEmail());
-            userDto.setPhoneNumber(user.getPhoneNumber());
-            userDto.setProfileImageUrl(user.getProfileImageUrl());
-            userDto.setCreatedAt(user.getCreatedAt());
-            userDto.setUpdatedAt(user.getUpdatedAt());
-            userDto.setRole(user.getRole());
-
-
-            return new ResponseDto(200, "User found", userDto);
-        } else {
-            return new ResponseDto(404, "User with ID " + userId + " not found.");
-        }
+        return userRepo.findById(userId)
+                .map(user -> new ResponseDto(200, "User found", mapToDto(user)))
+                .orElse(new ResponseDto(404, "User with ID " + userId + " not found."));
     }
 
-
-
     public ResponseDto updateUser(Long userId, UserDto dto) {
-        Optional<Users> optionalUser = userRepo.findById(userId);
-        if (optionalUser.isPresent()) {
-            Users user = optionalUser.get();
+        return userRepo.findById(userId).map(user -> {
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setEmail(dto.getEmail());
             user.setPhoneNumber(dto.getPhoneNumber());
             user.setProfileImageUrl(dto.getProfileImageUrl());
-
             if (dto.getRole() != null && !dto.getRole().isEmpty()) {
                 user.setRole(dto.getRole());
             }
-
             userRepo.save(user);
             return new ResponseDto(200, "User updated successfully!");
-        } else {
-            return new ResponseDto(404, "User with ID " + userId + " not found.");
-        }
+        }).orElse(new ResponseDto(404, "User with ID " + userId + " not found."));
     }
+
     public Optional<Users> getUserByEmail(String email) {
         try {
-
-            Optional<Users> userOptional = userRepo.findByEmail(email);
-
-
-            return userOptional;
-
+            return userRepo.findByEmail(email);
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred while retrieving the user by email: " + e.getMessage(), e);
+            throw new RuntimeException("Error retrieving user by email: " + e.getMessage(), e);
         }
     }
 
@@ -152,11 +83,41 @@ public class UserService {
         if (userRepo.existsById(userId)) {
             userRepo.deleteById(userId);
             return new ResponseDto(200, "User deleted successfully!");
-        } else {
-            return new ResponseDto(404, "User with ID " + userId + " not found.");
         }
+        return new ResponseDto(404, "User with ID " + userId + " not found.");
     }
 
+    private UserDto mapToDto(Users user) {
+        UserDto dto = new UserDto();
+        dto.setUserId(user.getUserId());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setProfileImageUrl(user.getProfileImageUrl());
+        dto.setRole(user.getRole());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
 
+
+        if (user.getAddresses() != null) {
+            dto.setAddresses(user.getAddresses().stream().map(address -> {
+                AddressDto addressDto = new AddressDto();
+                addressDto.setAddressId(address.getAddressId());
+                addressDto.setStreet(address.getStreet());
+                addressDto.setCity(address.getCity());
+                addressDto.setState(address.getState());
+                addressDto.setPostalCode(address.getPostalCode());
+                addressDto.setCountry(address.getCountry());
+                return addressDto;
+            }).collect(Collectors.toList()));
+        }
+
+
+        if (user.getOrders() != null) {
+            dto.setOrders(user.getOrders().stream().map(order -> new OrderDto(order)).collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
 }
-

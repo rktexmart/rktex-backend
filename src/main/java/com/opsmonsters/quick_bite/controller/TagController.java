@@ -4,12 +4,17 @@ import com.opsmonsters.quick_bite.dto.TagDto;
 import com.opsmonsters.quick_bite.services.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 
 @RestController
+@CrossOrigin(origins = {
+        "http://localhost:4200",
+        "http://13.61.26.222"
+})
 @RequestMapping("/admin/product/tags")
 public class TagController {
 
@@ -25,6 +30,7 @@ public class TagController {
 
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<TagDto>> getAllTags() {
         List<TagDto> tags = tagService.getAllTags();
         return ResponseEntity.ok(tags);
@@ -44,3 +50,6 @@ public class TagController {
         return ResponseEntity.noContent().build();
     }
 }
+
+
+

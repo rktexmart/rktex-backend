@@ -2,19 +2,10 @@ package com.opsmonsters.quick_bite.dto;
 
 public class ResetPasswordDto {
    private String email;
-    private String token;
+
     private String newPassword;
     private String otp;
 
-
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     public String getNewPassword() {
         return newPassword;

@@ -1,8 +1,5 @@
 package com.opsmonsters.quick_bite.services;
-import com.opsmonsters.quick_bite.dto.ForgotPasswordDto;
-import com.opsmonsters.quick_bite.dto.LoginDto;
-import com.opsmonsters.quick_bite.dto.ResetPasswordDto;
-import com.opsmonsters.quick_bite.dto.ResponseDto;
+import com.opsmonsters.quick_bite.dto.*;
 import com.opsmonsters.quick_bite.models.Otp;
 import com.opsmonsters.quick_bite.models.Users;
 import com.opsmonsters.quick_bite.repositories.OtpRepo;
@@ -46,26 +43,26 @@ public class AuthServices {
 
     public ResponseDto userLogin(LoginDto loginDto) {
         try {
-        System.out.println(loginDto.getUsername());
-            logger.info("Attempting to login with username: {}", loginDto.getUsername());
+            System.out.println(loginDto.getEmail());
+            logger.info("Attempting to login with username: {}", loginDto.getEmail());
 
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword())
+                    new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
             );
 
 
-            Optional<Users> userOptional = userRepo.findByEmail(loginDto.getUsername());
+            Optional<Users> userOptional = userRepo.findByEmail(loginDto.getEmail());
 
 
             if (userOptional.isEmpty()) {
-                logger.error("User not found with username: {}", loginDto.getUsername());
+                logger.error("User not found with username: {}", loginDto.getEmail());
                 return new ResponseDto(404, "Email does not exist");
             }
 
             Users user = userOptional.get();
 
             if (!user.getIsOtpVerified()) {
-                logger.error("User with email {} has not verified OTP", loginDto.getUsername());
+                logger.error("User with email {} has not verified OTP", loginDto.getEmail());
                 return new ResponseDto(403, "Please verify your OTP before logging in.");
             }
 
@@ -77,7 +74,7 @@ public class AuthServices {
 
         } catch (BadCredentialsException badCredentials) {
             badCredentials.printStackTrace(System.out);
-            logger.error("Invalid credentials for username: {}", loginDto.getUsername());
+            logger.error("Invalid credentials for username: {}", loginDto.getEmail());
             return new ResponseDto(403, "Username / password is incorrect");
         } catch (Exception e) {
 
@@ -172,8 +169,27 @@ public class AuthServices {
         }
     }
 
+    public LoginResponseDto userLoginWithDetails(LoginDto loginDto) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
+            );
+
+            Users user = userRepo.findByEmail(loginDto.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!user.getIsOtpVerified()) {
+                throw new RuntimeException("Please verify your OTP before logging in.");
+            }
+
+            String jwtToken = jwtService.generateToken(user.getEmail(), user.getRole());
+
+            return new LoginResponseDto(jwtToken, user.getUserId(), user.getEmail());
+
+        } catch (BadCredentialsException e) {
+            throw new RuntimeException("Username / password is incorrect");
+        }
+    }
+
 
 }
-
-
-

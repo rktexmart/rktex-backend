@@ -7,9 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -17,6 +15,7 @@ public class Users implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id", nullable = false, updatable = false)
     private Long userId;
 
     @Column(name = "first_name", nullable = false)
@@ -54,6 +53,37 @@ public class Users implements UserDetails {
     @Column(name = "reset_token")
     private String resetToken;
 
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Order> orders = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Address> addresses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_promo_codes",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "promo_code_id")
+    )
+    private Set<PromoCode> appliedPromoCodes = new HashSet<>();
+
+
+    @ManyToMany(fetch = FetchType.EAGER)  // changed from LAZY to EAGER
+    @JoinTable(
+            name = "user_wishlist",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private Set<Product> wishlist = new HashSet<>();
+
+
+
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
@@ -67,12 +97,36 @@ public class Users implements UserDetails {
         updatedAt = new Date();
     }
 
-    public void setPassword(String password) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.password = encoder.encode(password);
-
+    public List<Order> getOrders() {
+        return orders;
     }
-    public Users() {
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public Set<PromoCode> getAppliedPromoCodes() {
+        return appliedPromoCodes;
+    }
+
+    public void setAppliedPromoCodes(Set<PromoCode> appliedPromoCodes) {
+        this.appliedPromoCodes = appliedPromoCodes;
     }
 
     public Long getUserId() {
@@ -99,14 +153,16 @@ public class Users implements UserDetails {
         this.lastName = lastName;
     }
 
-
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPhoneNumber() {
@@ -125,21 +181,12 @@ public class Users implements UserDetails {
         this.profileImageUrl = profileImageUrl;
     }
 
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
     }
 
     public Date getUpdatedAt() {
@@ -150,12 +197,20 @@ public class Users implements UserDetails {
         this.updatedAt = updatedAt;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public Boolean getIsOtpVerified() {
         return isOtpVerified;
     }
 
-    public void setIsOtpVerified(Boolean isOtpVerified) {
-        this.isOtpVerified = isOtpVerified;
+    public void setIsOtpVerified(Boolean otpVerified) {
+        isOtpVerified = otpVerified;
     }
 
     public String getResetToken() {
@@ -166,9 +221,17 @@ public class Users implements UserDetails {
         this.resetToken = resetToken;
     }
 
+    public Set<Product> getWishlist() {
+        return wishlist;
+    }
+
+    public void setWishlist(Set<Product> wishlist) {
+        this.wishlist = wishlist;
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
         return Collections.emptyList();
     }
 
@@ -181,6 +244,7 @@ public class Users implements UserDetails {
     public String getUsername() {
         return email;
     }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -200,9 +264,9 @@ public class Users implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    public Users getUser() {
-        return this;
-    }
+}
 
-    }
+
+
+
 

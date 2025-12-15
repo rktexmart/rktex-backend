@@ -1,6 +1,8 @@
 package com.opsmonsters.quick_bite.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,10 +18,41 @@ public class Tag {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "tags")
+    @ManyToMany(mappedBy = "tags", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JsonBackReference
     private Set<Product> products = new HashSet<>();
 
+    // ✅ No-args constructor (required by JPA)
+    public Tag() {}
 
+    // ✅ Constructor with parameters (for easier object creation)
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    // ✅ Constructor with all fields (useful for DTO conversions)
+    public Tag(Long tagId, String name) {
+        this.tagId = tagId;
+        this.name = name;
+    }
+
+    public Set<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<Product> products) {
+        this.products = products;
+    }
+
+    public void addProduct(Product product) {
+        this.products.add(product);
+        product.getTags().add(this);
+    }
+
+    public void removeProduct(Product product) {
+        this.products.remove(product);
+        product.getTags().remove(this);
+    }
 
     public Long getTagId() {
         return tagId;
@@ -35,13 +68,5 @@ public class Tag {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(Set<Product> products) {
-        this.products = products;
     }
 }

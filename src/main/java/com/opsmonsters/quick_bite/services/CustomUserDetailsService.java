@@ -28,10 +28,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> {
                     logger.warn("User not found with email: {}", username);
                     return new UsernameNotFoundException("Invalid credentials");
-                }).getUser();
-
+                });
         logger.info("User found: {}", user.getEmail());
-
 
         return User.builder()
                 .username(user.getEmail())
@@ -39,5 +37,4 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .roles(user.getRole())
                 .build();
     }
-
 }

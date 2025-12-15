@@ -8,9 +8,7 @@ import com.opsmonsters.quick_bite.repositories.TagRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,15 +21,16 @@ public class TagService {
     @Autowired
     private ProductRepo productRepo;
 
+
     public TagDto createTag(TagDto dto) {
         Tag tag = new Tag();
         tag.setName(dto.getName());
 
         Tag savedTag = tagRepo.save(tag);
-
         dto.setTagId(savedTag.getTagId());
         return dto;
     }
+
 
     public List<TagDto> getAllTags() {
         return tagRepo.findAll()
@@ -45,35 +44,39 @@ public class TagService {
                 .collect(Collectors.toList());
     }
 
+
     public TagDto addTagsToProduct(Long productId, Set<Long> tagIds) {
-        Optional<Product> productOptional = productRepo.findById(productId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (!productOptional.isPresent()) {
-            throw new RuntimeException("Product not found");
+        Set<Tag> tags = tagRepo.findAllById(tagIds).stream().collect(Collectors.toSet());
+
+        if (tags.isEmpty()) {
+            throw new RuntimeException("No valid tags found. Ensure the tags exist before adding.");
         }
 
-        Product product = productOptional.get();
-        Set<Tag> tags = new HashSet<>();
 
-        for (Long tagId : tagIds) {
-            Optional<Tag> tagOptional = tagRepo.findById(tagId);
+        product.getTags().clear();
 
-            if (tagOptional.isPresent()) {
-                tags.add(tagOptional.get());
-            } else {
-                throw new RuntimeException("Tag with ID " + tagId + " not found");
-            }
+
+        for (Tag tag : tags) {
+            product.addTag(tag);
         }
 
-        product.setTags(tags);
         productRepo.save(product);
-
-        TagDto tagDto = new TagDto();
-        tagDto.setTagId(null);
-        return tagDto;
+        return new TagDto();
     }
 
+
     public void deleteTag(Long tagId) {
-        tagRepo.deleteById(tagId);
+        Tag tag = tagRepo.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag not found"));
+
+
+        for (Product product : tag.getProducts()) {
+            product.removeTag(tag);
+        }
+
+        tagRepo.delete(tag);
     }
 }

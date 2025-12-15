@@ -9,7 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/otp")
+@CrossOrigin(origins = {
+        "http://localhost:4200",
+        "http://13.61.26.222"
+})
+@RequestMapping("/auth/otp")
 public class OtpController {
 
     @Autowired

@@ -20,21 +20,18 @@ public class OtpService {
     private OtpRepo otpRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private EmailService emailService;
 
     public ResponseDto generateOtp(String email) {
         try {
-
             Optional<Users> userOptional = userRepo.findByEmail(email);
             if (userOptional.isEmpty()) {
                 return new ResponseDto(400, "User not found with the provided email", null);
             }
 
-
             Users user = userOptional.get();
-
-
             String otp = String.format("%06d", new SecureRandom().nextInt(999999));
-
 
             Otp otpEntity = new Otp();
             otpEntity.setUser(user);
@@ -43,16 +40,17 @@ public class OtpService {
             otpEntity.setExpiresAt(new Date(System.currentTimeMillis() + 300000));
             otpEntity.setIsUsed(false);
 
-
             otpRepo.save(otpEntity);
 
-            return new ResponseDto(200, "OTP generated successfully", null);
+            // ✅ Send email to customer
+            emailService.sendOtpEmail(user.getEmail(), otp);
+
+            return new ResponseDto(200, "OTP generated & sent to email successfully", null);
 
         } catch (Exception e) {
             return new ResponseDto(500, "Error generating OTP: " + e.getMessage(), null);
         }
     }
-
 
     public ResponseDto validateOtp(String email, String otp) {
         try {
@@ -112,8 +110,3 @@ public class OtpService {
     }
 
 }
-
-
-
-
-

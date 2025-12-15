@@ -1,6 +1,7 @@
 package com.opsmonsters.quick_bite.dto;
 
 import java.util.Date;
+import java.util.List;
 
 public class UserDto {
     private Long userId;
@@ -13,16 +14,11 @@ public class UserDto {
     private Date createdAt;
     private Date updatedAt;
     private String role;
-    public UserDto() {
-        this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.profileImageUrl = profileImageUrl;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
+    private List<AddressDto> addresses;
+    private List<OrderDto> orders;
+
+    public UserDto() {}
+
     public Long getUserId() {
         return userId;
     }
@@ -35,17 +31,17 @@ public class UserDto {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
     public String getLastName() {
         return lastName;
     }
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
     }
     public String getPassword() {
         return password;
@@ -68,7 +64,6 @@ public class UserDto {
     public String getRole() {
         return role;
     }
-
     public void setRole(String role) {
         this.role = role;
     }
@@ -83,5 +78,22 @@ public class UserDto {
     }
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+
+    public List<AddressDto> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<AddressDto> addresses) {
+        this.addresses = addresses;
+    }
+
+    public List<OrderDto> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<OrderDto> orders) {
+        this.orders = orders;
     }
 }
