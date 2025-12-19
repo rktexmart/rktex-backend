@@ -12,7 +12,9 @@ import java.util.Map;
 @RestController
 @CrossOrigin(origins = {
         "http://localhost:4200",
-        "http://13.61.26.222"
+        "http://13.61.26.222",
+        "https://heartfelt-blancmange-2c2c34.netlify.app",
+        "https://rktex-frontend.netlify.app"
 })
 @RequestMapping("/product/images")
 public class ProductImageController {
@@ -27,7 +29,7 @@ public class ProductImageController {
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("image") MultipartFile file) {
         try {
             String filename = productImageService.saveImageFile(file);
-            String imageUrl = "http://13.61.26.222/uploads/" + filename;
+            String imageUrl = "https://rktex-backend.onrender.com/uploads/" + filename;
             return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

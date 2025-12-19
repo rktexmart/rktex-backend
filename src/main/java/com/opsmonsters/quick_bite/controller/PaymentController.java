@@ -12,7 +12,9 @@ import java.util.Map;
 @RestController
 @CrossOrigin(origins = {
         "http://localhost:4200",
-        "http://13.61.26.222"
+        "http://13.61.26.222",
+        "https://heartfelt-blancmange-2c2c34.netlify.app",
+        "https://rktex-frontend.netlify.app"
 })
 @RequestMapping("/api/payment")
 public class PaymentController {

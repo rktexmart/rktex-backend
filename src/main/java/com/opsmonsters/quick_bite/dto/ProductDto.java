@@ -28,7 +28,7 @@ public class ProductDto {
     private List<String> sizes;
     private List<String> imageUrls;
 
-    private static final String BASE_IMAGE_URL = "http://13.61.26.222/uploads/";
+    private static final String BASE_IMAGE_URL = "https://rktex-backend.onrender.com/uploads/";
 
 
     public ProductDto() {}

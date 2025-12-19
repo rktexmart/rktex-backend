@@ -30,7 +30,10 @@ import java.util.UUID;
 @RestController
 @CrossOrigin(origins = {
         "http://localhost:4200",
-        "http://13.61.26.222"
+        "http://13.61.26.222",
+        "https://heartfelt-blancmange-2c2c34.netlify.app",
+        "https://rktex-frontend.netlify.app"
+
 })
 @RequestMapping("/products")
 public class ProductController {
@@ -88,10 +91,10 @@ public class ProductController {
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
-
+//
 //    @GetMapping
-//    public ResponseEntity<List<ProductDto>> getAllProductsAlias() {
-//        return ResponseEntity.ok(productService.getAllProducts());
+//    public List<ProductDto> getAllProductsAlias() {
+//        return productService.getAllProducts();
 //    }
 
 
@@ -205,8 +208,7 @@ public class ProductController {
             throw new RuntimeException("Failed to save image file", e);
         }
 
-        String host = "http://13.61.26.222"; // your EC2 public IP
-        return host + "/uploads/" + filename;
+        return filename;
 
     }
 

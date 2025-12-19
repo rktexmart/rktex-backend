@@ -11,7 +11,9 @@ import java.util.List;
 @RequestMapping("/api/product-attributes")
 @CrossOrigin(origins = {
         "http://localhost:4200",
-        "http://13.61.26.222"
+        "http://13.61.26.222",
+        "https://heartfelt-blancmange-2c2c34.netlify.app",
+        "https://rktex-frontend.netlify.app"
 })
 public class ProductAttributeController {
 
