@@ -41,9 +41,12 @@ Production-ready E-commerce backend built using Spring Boot with secure authenti
 - Cloudinary (Image Upload)
 - Razorpay (Payment Gateway)
 
+
 ## 📊 API Documentation (Swagger)
-Available at:
+Available locally:
 http://localhost:8080/swagger-ui/index.html
+
+(Backend was previously deployed on cloud, but currently inactive due to free-tier limitations. Can be demonstrated locally.)
 
 ## 🚀 How to Run
 1. Clone the repository
