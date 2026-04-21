@@ -1,7 +1,7 @@
 # RKTex E-commerce Backend (Spring Boot)
 
 ## 🖼 Swagger API Preview
-![Swagger Screenshot](Rktex-Swagger.PNG)
+![Swagger Screenshot](rktex-swagger.png)
 
 ## 🔥 Overview
 Production-ready E-commerce backend built using Spring Boot with secure authentication, order management, payment integration, and admin capabilities.
